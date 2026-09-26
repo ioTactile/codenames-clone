@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { User } from '@/types/types'
+import type { User } from '@/domain/types'
 
 export const useUserStore = defineStore(
   'user',
@@ -17,7 +17,7 @@ export const useUserStore = defineStore(
     }
 
     const removeUser = (roomId: number, username: string) => {
-      user.value = user.value.filter((u) => u.roomId !== roomId && u.username !== username)
+      user.value = user.value.filter((u) => !(u.roomId === roomId && u.username === username))
     }
 
     const getUser = (roomId: number) => {

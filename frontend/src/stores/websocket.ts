@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { CompatClient, Stomp } from '@stomp/stompjs'
+import { CompatClient, Stomp, type IMessage } from '@stomp/stompjs'
 import SockJS from 'sockjs-client/dist/sockjs.min.js'
 import { ref } from 'vue'
-import type { Room } from '@/types/types'
+import type { Room } from '@/domain/types'
 
 export const useWebsocketStore = defineStore('websocket', () => {
   const room = ref<Room | null>(null)
@@ -20,8 +20,8 @@ export const useWebsocketStore = defineStore('websocket', () => {
 
     stompClient.value.connect({}, () => {
       if (!stompClient.value) return
-      stompClient.value.subscribe(`/topic/room/${roomId}`, (response: any) => {
-        const data = JSON.parse(response.body)
+      stompClient.value.subscribe(`/topic/room/${roomId}`, (response: IMessage) => {
+        const data = JSON.parse(response.body) as Room
         room.value = data
       })
     })
@@ -43,8 +43,8 @@ export const useWebsocketStore = defineStore('websocket', () => {
 
     stompClient.value.connect({}, () => {
       if (!stompClient.value) return
-      stompClient.value.subscribe(`/topic/room/${roomId}`, (response: any) => {
-        const data = JSON.parse(response.body)
+      stompClient.value.subscribe(`/topic/room/${roomId}`, (response: IMessage) => {
+        const data = JSON.parse(response.body) as Room
         room.value = data
       })
     })

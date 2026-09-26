@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import type { Room } from '@/types/types'
-import { apiFetchData } from '@/utils/api'
+import { roomService } from '@/application/roomService'
 import { useUserStore } from '@/stores/user'
 import Newsletter from '@/components/HomeNewsletter.vue'
 
@@ -24,15 +23,12 @@ const joinRoom = async (): Promise<void> => {
 
   try {
     if (props.location === 'create') {
-      const data: Room = await apiFetchData('room/create', 'POST', { username: username.value })
+      const data = await roomService.createRoom(username.value)
       userStore.setUser(data.id, username.value)
       router.push({ name: 'room-details', params: { id: data.id } })
     } else if (props.location === 'join') {
       const roomId = Number(route.params.id)
-      await apiFetchData(`room/${roomId}`, 'PUT', {
-        action: 'join',
-        username: username.value
-      })
+      await roomService.join(roomId, username.value)
       userStore.setUser(roomId, username.value)
     }
   } catch (error) {
@@ -45,7 +41,7 @@ const joinRoom = async (): Promise<void> => {
 
 <template>
   <div
-    class="border-ui max-w-9/10 flex w-96 flex-col overflow-hidden rounded-xl bg-white pt-4 text-black shadow-bottom will-change-transform"
+    class="border-ui shadow-bottom flex w-96 max-w-9/10 flex-col overflow-hidden rounded-xl bg-white pt-4 text-black will-change-transform"
   >
     <section class="px-2 pb-4 text-center">
       <h1 class="mb-4 text-xl font-bold">Bienvenue dans Codenames</h1>
@@ -58,7 +54,7 @@ const joinRoom = async (): Promise<void> => {
           id="username-input"
           type="text"
           v-model="username"
-          class="mx-auto mb-1 rounded-xl border p-2 text-center text-base text-black shadow-inset"
+          class="shadow-inset mx-auto mb-1 rounded-xl border p-2 text-center text-base text-black"
         />
       </div>
       <button @click="joinRoom" class="button rounded-2xl border-2 text-base shadow-xl">

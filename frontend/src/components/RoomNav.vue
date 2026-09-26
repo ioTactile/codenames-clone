@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Player as P, Room } from '@/types/types'
+import type { Player as P, Room } from '@/domain/types'
 import Players from '@/components/RoomPlayers.vue'
 import Player from '@/components/RoomPlayer.vue'
-import { apiFetchData } from '@/utils/api'
+import { roomService } from '@/application/roomService'
 import { useWebsocketStore } from '@/stores/websocket'
 
 const props = defineProps<{
@@ -31,17 +31,13 @@ const togglePlayerMenu = (): void => {
 const replay = async (): Promise<void> => {
   if (!props.isHost) return
   try {
-    await apiFetchData(`room/${props.room.id}`, 'PUT', {
-      action: 'replay',
-      usernames: getUsernames()
-    })
-    websocketStore.handleUserActivity()
+    await roomService.replay(props.room.id, getUsernames(), websocketStore.handleUserActivity)
   } catch (error) {
     console.error(error)
   }
 }
 
-const getUsernames = (): String[] => {
+const getUsernames = (): string[] => {
   const usernames = props.room.players.map((player) => player.name)
   return usernames
 }
@@ -68,7 +64,7 @@ const getUsernames = (): String[] => {
       </div>
       <button
         v-if="isHost"
-        class="button-circle ml-2 flex items-center justify-center shadow-bottom"
+        class="button-circle shadow-bottom ml-2 flex items-center justify-center"
         @click="emit('openTimerMenu', true)"
       >
         <img src="/images/timer.png" alt="Timer icon" class="pointer-events-none w-3/4" />
@@ -77,12 +73,12 @@ const getUsernames = (): String[] => {
     <div class="flex">
       <button
         v-if="isHost && room.status === 'IN_PROGRESS'"
-        class="button text-base shadow-bottom"
+        class="button shadow-bottom text-base"
         @click="replay"
       >
         Réinitialiser
       </button>
-      <button class="button mx-2 shadow-bottom" @click="emit('openRulesMenu', true)">Règles</button>
+      <button class="button shadow-bottom mx-2" @click="emit('openRulesMenu', true)">Règles</button>
       <div class="relative">
         <button
           class="button shadow-bottom"
@@ -98,7 +94,7 @@ const getUsernames = (): String[] => {
               {{ user?.name || 'Non défini' }}
             </span>
             <svg
-              class="dark:text-dark-text absolute -right-1 top-3 h-5 w-5 -translate-y-1/2 transform fill-current text-gray-700"
+              class="dark:text-dark-text absolute top-3 -right-1 h-5 w-5 -translate-y-1/2 transform fill-current text-gray-700"
               xmlns="http://www.w3.org/2000/svg"
               viewbox="0 0 22 22"
             >

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Room, Player } from '@/types/types'
+import type { Room, Player } from '@/domain/types'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -54,7 +54,7 @@ const getSupp = computed((): string => {
 <template>
   <div class="relative mx-auto flex h-16 w-full items-center justify-center landscape:w-[1060px]">
     <div
-      class="mx-12 rounded-lg bg-white px-2 py-1 text-center text-base font-bold shadow-bottom landscape:text-2xl"
+      class="shadow-bottom mx-12 rounded-lg bg-white px-2 py-1 text-center text-base font-bold landscape:text-2xl"
     >
       <span>{{ getInstructions + getSupp }}</span>
     </div>

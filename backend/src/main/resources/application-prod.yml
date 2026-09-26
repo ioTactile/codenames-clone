@@ -18,7 +18,6 @@ spring:
       hibernate:
         show-sql: false
         format-sql: false
-        dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
     generate-ddl: false
   devtools:

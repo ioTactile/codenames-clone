@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Room } from '@/types/types'
-import { apiFetchData } from '@/utils/api'
+import type { Room } from '@/domain/types'
+import { roomService } from '@/application/roomService'
 import { useWebsocketStore } from '@/stores/websocket'
 
 const props = defineProps<{
@@ -10,12 +10,8 @@ const props = defineProps<{
 const websocketStore = useWebsocketStore()
 
 const startRoom = async (): Promise<void> => {
-  const roomId = props.room.id
   try {
-    await apiFetchData(`room/${roomId}`, 'PUT', {
-      action: 'start'
-    })
-    websocketStore.handleUserActivity()
+    await roomService.start(props.room.id, websocketStore.handleUserActivity)
   } catch (error) {
     console.error(error)
   }
@@ -23,7 +19,7 @@ const startRoom = async (): Promise<void> => {
 </script>
 
 <template>
-  <div class="config-wrapper absolute rounded-xl bg-white shadow-bottom">
+  <div class="config-wrapper shadow-bottom absolute rounded-xl bg-white">
     <div class="relative flex flex-1 flex-col justify-between">
       <section class="overflow-y-auto rounded-tl-xl rounded-tr-xl bg-gray-200">
         <div class="relative flex flex-col rounded-xl bg-gray-200">
@@ -32,7 +28,7 @@ const startRoom = async (): Promise<void> => {
             <section class="mb-2 flex justify-end landscape:mb-0">
               <button class="group flex items-center justify-center py-1">
                 <div
-                  class="flex items-center justify-center rounded-lg border-2 border-white bg-white px-2 py-1 hover:border-yellow"
+                  class="hover:border-yellow flex items-center justify-center rounded-lg border-2 border-white bg-white px-2 py-1"
                 >
                   <div class="mr-4 rtl:ml-4">
                     <img src="/images/arrow-right.svg" alt="Arrow right icon" class="w-[30px]" />
@@ -68,12 +64,12 @@ const startRoom = async (): Promise<void> => {
           </div>
         </div>
       </section>
-      <section class="mt-auto flex items-center justify-center py-4 portrait:pb-1.5 portrait:pt-1">
+      <section class="mt-auto flex items-center justify-center py-4 portrait:pt-1 portrait:pb-1.5">
         <div class="m-2">
-          <button class="button text-base shadow-bottom">Paramètres complets</button>
+          <button class="button shadow-bottom text-base">Paramètres complets</button>
         </div>
         <div class="m-2">
-          <button class="button color-green text-base shadow-bottom" @click="startRoom">
+          <button class="button color-green shadow-bottom text-base" @click="startRoom">
             Jouer avec les paramètres recommandés
           </button>
         </div>

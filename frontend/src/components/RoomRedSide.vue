@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { Room, Player } from '@/types/types'
-import { apiFetchData } from '@/utils/api'
+import type { Room, Player } from '@/domain/types'
+import { roomService } from '@/application/roomService'
+import { hasNoRole, playersByTeamRole } from '@/domain/roomRules'
 import { computed } from 'vue'
 import { useWebsocketStore } from '@/stores/websocket'
 
@@ -11,38 +12,22 @@ const props = defineProps<{
 
 const websocketStore = useWebsocketStore()
 
-const redAgents = computed((): Player[] => {
-  if (!props.room) return []
-  return props.room.players.filter(
-    (player) => player.playerTeam === 'RED' && player.playerRole === 'OPERATIVE'
-  )
-})
+const redAgents = computed((): Player[] => playersByTeamRole(props.room, 'RED', 'OPERATIVE'))
 
-const redSpymaster = computed((): Player[] => {
-  if (!props.room) return []
-  return props.room.players.filter(
-    (player) => player.playerTeam === 'RED' && player.playerRole === 'SPYMASTER'
-  )
-})
+const redSpymaster = computed((): Player[] => playersByTeamRole(props.room, 'RED', 'SPYMASTER'))
 
-const noRolePlayer = computed((): boolean => {
-  if (!props.room) return false
-  return props.room.players.some(
-    (player) => props.user?.name === player.name && player.playerRole === 'NONE'
-  )
-})
+const noRolePlayer = computed((): boolean => hasNoRole(props.room, props.user?.name))
 
-const joinRole = async (role: string): Promise<void> => {
-  if (props.user?.playerTeam === 'BLUE') return
+const joinRole = async (role: 'OPERATIVE' | 'SPYMASTER'): Promise<void> => {
+  if (props.user?.playerTeam === 'BLUE' || !props.user) return
   try {
-    const roomId = props.room.id
-    await apiFetchData(`room/${roomId}`, 'PUT', {
-      action: 'select-role',
-      username: props.user?.name,
+    await roomService.selectRole(
+      props.room.id,
+      props.user.name,
       role,
-      team: 'RED'
-    })
-    websocketStore.handleUserActivity()
+      'RED',
+      websocketStore.handleUserActivity
+    )
   } catch (error) {
     console.error(error)
   }
@@ -58,28 +43,28 @@ const getCharacter = (): string => {
 
 <template>
   <div
-    class="teamSelectWrapper landscape:border-ui flex-1 bg-red-team-bg landscape:flex-none landscape:rounded-xl landscape:shadow-bottom"
+    class="teamSelectWrapper landscape:border-ui bg-red-team-bg landscape:shadow-bottom flex-1 landscape:flex-none landscape:rounded-xl"
   >
     <div class="box-border w-full p-2">
       <section class="relative h-12 landscape:h-36">
         <span
-          class="score absolute right-[20px] top-6 w-12 text-center text-white landscape:top-14"
+          class="score absolute top-6 right-[20px] w-12 text-center text-white landscape:top-14"
           >{{ room.redRemainingWords || '-' }}</span
         >
         <div
-          class="card-background absolute left-0 top-0 z-10 portrait:hidden"
+          class="card-background absolute top-0 left-0 z-10 portrait:hidden"
           style="background-position-y: 100%"
         >
           <div class="card-character absolute bottom-0 left-1/2" :style="getCharacter()"></div>
         </div>
       </section>
       <section>
-        <span class="relative mt-1 w-full text-base text-red-light">Agents</span>
+        <span class="text-red-light relative mt-1 w-full text-base">Agents</span>
         <div v-if="redAgents.length" class="flex flex-wrap items-start justify-start">
           <div
             v-for="(user, i) in redAgents"
             :key="i"
-            class="user-wrapper mb-1 mr-1 inline-block truncate rounded border border-white/40 px-1 py-1 font-bold leading-none text-white"
+            class="user-wrapper mr-1 mb-1 inline-block truncate rounded border border-white/40 px-1 py-1 leading-none font-bold text-white"
           >
             {{ user.name }}
           </div>
@@ -87,19 +72,19 @@ const getCharacter = (): string => {
         <div v-else class="pl-2 text-white">–</div>
         <button
           v-if="noRolePlayer && (user?.playerTeam === 'RED' || user?.playerTeam === 'NONE')"
-          class="button text-base shadow-bottom"
+          class="button shadow-bottom text-base"
           @click="joinRole('OPERATIVE')"
         >
           Rejoindre en tant qu'agent
         </button>
       </section>
       <section>
-        <span class="relative mt-1 w-full text-base text-red-light">Espions</span>
+        <span class="text-red-light relative mt-1 w-full text-base">Espions</span>
         <div v-if="redSpymaster.length" class="flex flex-wrap items-start justify-start">
           <div
             v-for="(user, i) in redSpymaster"
             :key="i"
-            class="user-wrapper mb-1 mr-1 inline-block truncate rounded border border-white/40 px-1 py-1 font-bold leading-none text-white"
+            class="user-wrapper mr-1 mb-1 inline-block truncate rounded border border-white/40 px-1 py-1 leading-none font-bold text-white"
           >
             {{ user.name }}
           </div>
@@ -107,7 +92,7 @@ const getCharacter = (): string => {
         <div v-else class="pl-2 text-white">–</div>
         <button
           v-if="!redSpymaster.length && (user?.playerTeam === 'RED' || user?.playerTeam === 'NONE')"
-          class="button text-base shadow-bottom"
+          class="button shadow-bottom text-base"
           @click="joinRole('SPYMASTER')"
         >
           Rejoindre en tant qu'espion

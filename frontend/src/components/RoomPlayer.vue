@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import type { Player, Room } from '@/types/types'
+import type { Player, Room, Team } from '@/domain/types'
 import { useUserStore } from '@/stores/user'
 import { useWebsocketStore } from '@/stores/websocket'
-// import { useUrlStore } from '@/stores/url'
 import { ref } from 'vue'
-import { apiFetchData } from '@/utils/api'
+import { roomService } from '@/application/roomService'
 import { useRouter } from 'vue-router'
-// import { storeToRefs } from 'pinia'
 
 const props = defineProps<{
   id: number
@@ -18,13 +16,7 @@ const router = useRouter()
 
 const userStore = useUserStore()
 const websocketStore = useWebsocketStore()
-// const urlStore = useUrlStore()
-// const { isUrlHidden } = storeToRefs(urlStore)
 const username = ref<string>(props.user?.name || '')
-
-// const urlSwitch = (): void => {
-//   isUrlHidden.value = !isUrlHidden.value
-// }
 
 const changeUsername = async (): Promise<void> => {
   if (!username.value) {
@@ -33,25 +25,22 @@ const changeUsername = async (): Promise<void> => {
   }
 
   try {
-    await apiFetchData(`room/${props.id}`, 'PUT', {
-      action: 'change-username',
-      username: props.user?.name,
-      newUsername: username.value
-    })
+    await roomService.changeUsername(
+      props.id,
+      props.user!.name,
+      username.value,
+      websocketStore.handleUserActivity
+    )
     userStore.setUser(props.id, username.value)
-    websocketStore.handleUserActivity()
   } catch (error) {
     console.error(error)
   }
 }
 
 const leaveRoom = async (): Promise<void> => {
-  if (props.status !== 'PENDING') return
+  if (props.status !== 'PENDING' || !props.user) return
   try {
-    await apiFetchData(`room/${props.id}`, 'PUT', {
-      action: 'leave',
-      username: props.user?.name
-    })
+    await roomService.leave(props.id, props.user.name, websocketStore.handleUserActivity)
     userStore.removeUser(props.id, username.value)
     router.push({ name: 'home' })
   } catch (error) {
@@ -59,16 +48,11 @@ const leaveRoom = async (): Promise<void> => {
   }
 }
 
-const selectTeam = async (team: string): Promise<void> => {
+const selectTeam = async (team: Team): Promise<void> => {
   if (props.status !== 'PENDING') return
-  if (props.user?.playerTeam === 'NONE') return
+  if (props.user?.playerTeam === 'NONE' || !props.user) return
   try {
-    await apiFetchData(`room/${props.id}`, 'PUT', {
-      action: 'select-team',
-      username: props.user?.name,
-      team
-    })
-    websocketStore.handleUserActivity()
+    await roomService.selectTeam(props.id, props.user.name, team, websocketStore.handleUserActivity)
   } catch (error) {
     console.error(error)
   }
@@ -77,7 +61,7 @@ const selectTeam = async (team: string): Promise<void> => {
 
 <template>
   <div class="menu-wrapper">
-    <div class="border-ui rounded-xl bg-white shadow-bottom">
+    <div class="border-ui shadow-bottom rounded-xl bg-white">
       <template v-if="status === 'PENDING'">
         <div class="flex flex-col items-center justify-center p-4">
           <h3 v-if="user?.playerTeam === 'NONE'" class="my-2 text-center text-xl">
@@ -135,7 +119,7 @@ const selectTeam = async (team: string): Promise<void> => {
               type="text"
               id="username-input"
               placeholder="Choisissez votre pseudo"
-              class="mb-1 rounded-xl border py-2 text-center text-base text-black shadow-inset"
+              class="shadow-inset mb-1 rounded-xl border py-2 text-center text-base text-black"
             />
           </div>
           <button class="button" @click="changeUsername">Changer de pseudo</button>
@@ -156,8 +140,8 @@ const selectTeam = async (team: string): Promise<void> => {
         </div>
       </div> -->
       <hr class="border-gray-300" />
-      <div class="flex justify-center rounded-bl-xl rounded-br-xl bg-gray-200 py-4">
-        <button class="button text-base shadow-bottom" @click="leaveRoom">
+      <div class="flex justify-center rounded-br-xl rounded-bl-xl bg-gray-200 py-4">
+        <button class="button shadow-bottom text-base" @click="leaveRoom">
           <div class="flex items-center justify-center">
             <svg
               class="mr-2 w-5 flex-none fill-current text-black"

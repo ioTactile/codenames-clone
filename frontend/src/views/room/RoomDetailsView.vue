@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import type { Room } from '@/types/types'
 import Nav from '@/components/RoomNav.vue'
 import Join from '@/components/RoomJoin.vue'
 import Instructions from '@/components/RoomInstructions.vue'
@@ -14,11 +13,10 @@ import SocialMedia from '@/components/SocialMedia.vue'
 import TimerModal from '@/components/RoomTimerModal.vue'
 import RulesModal from '@/components/RulesModal.vue'
 import Replay from '@/components/RoomReplay.vue'
-import { apiFetchData } from '@/utils/api'
+import { roomService } from '@/application/roomService'
+import { isHost as checkIsHost, findPlayer, isWinningStatus } from '@/domain/roomRules'
 import { useUserStore } from '@/stores/user'
 import { useWebsocketStore } from '@/stores/websocket'
-// import { useUrlStore } from '@/stores/url'
-// import { storeToRefs } from 'pinia'
 import { useWindowSize } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 
@@ -29,8 +27,6 @@ const props = defineProps<{
 const userStore = useUserStore()
 const websocketStore = useWebsocketStore()
 const { room, isDisconnected } = storeToRefs(websocketStore)
-// const urlStore = useUrlStore()
-// const { urlId, isUrlHidden } = storeToRefs(urlStore)
 const isTimerMenuOpen = ref<boolean>(false)
 const isRulesMenuOpen = ref<boolean>(false)
 const isLoading = ref<boolean>(true)
@@ -41,11 +37,8 @@ onMounted(async () => {
   const roomId = props.id
   if (!roomId) return
 
-  // urlStore.setUrl(roomId.toString())
-  // history.pushState({}, '', `/room/${urlStore.getUrl()}`)
-
   try {
-    const data: Room = await apiFetchData(`room/${roomId}`, 'GET')
+    const data = await roomService.getRoom(roomId)
     room.value = data
     websocketStore.connect(roomId)
     isLoading.value = false
@@ -54,29 +47,16 @@ onMounted(async () => {
   }
 })
 
-// onBeforeUnmount(() => {
-//   window.addEventListener('beforeunload', () => {
-//     history.pushState({}, '', `/room/${props.id}`)
-//   })
-// })
-
 onUnmounted(() => {
   websocketStore.disconnect()
 })
 
 const user = computed(() => {
-  return (
-    room.value?.players.find(
-      (player) => player.name === userStore.getUser(room.value!.id)?.username
-    ) ?? null
-  )
+  if (!room.value) return null
+  return findPlayer(room.value, userStore.getUser(room.value.id)?.username) ?? null
 })
 
-const isHost = computed(() => {
-  if (!room.value || !user.value) return false
-  const host = room.value.players[0].name
-  return host === user.value?.name
-})
+const isHost = computed(() => !!room.value && checkIsHost(room.value, user.value?.name))
 
 const handleResize = () => {
   const targetHeight = 1080
@@ -140,7 +120,7 @@ watch(
                   <Board v-if="room.status !== 'PENDING'" :room="room" :user="user" />
                   <Config v-if="room.status === 'PENDING' && isHost" :room="room" />
                   <Replay
-                    v-if="room.status === ('RED_TEAM_WINS' || 'BLUE_TEAM_WINS')"
+                    v-if="isWinningStatus(room.status)"
                     :room="room"
                     :user="user"
                     :is-host="isHost"
@@ -189,7 +169,10 @@ watch(
               <p class="text-md mb-4 px-2">
                 Si vous voulez continuer à jouer, vous pouvez vous reconnecter au salon.
               </p>
-              <button class="button shadow-button text-base" @click="websocketStore.reconnect">
+              <button
+                class="button shadow-button text-base"
+                @click="websocketStore.reconnect(props.id)"
+              >
                 Se reconnecter au salon
               </button>
             </div>

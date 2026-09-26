@@ -1,9 +1,57 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Fira+Sans+Extra+Condensed&family=Nunito:wght@400;500;600;700;800;900&display=swap');
+@import 'tailwindcss';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --color-border-yellow: #fef9c2;
+  --color-yellow: #fee400;
+  --color-yellow-300: #fde047;
+  --color-yellow-400: #facc15;
+  --color-yellow-500: #eab308;
+  --color-border-orange: #e16000;
+  --color-orange: #fa0;
+  --color-purple: #881247;
+  --color-darkPurple: #430027;
+  --color-blackPurple: #1d0011;
+  --color-lightGray: #cccccc;
+  --color-darkGray: #727272;
+  --color-tutorial-desktop: hsla(86, 70%, 87%, 0.7);
+  --color-green-online: #3fda36;
+  --color-red-team-bg: #8f2b1c;
+  --color-red-light: #e65831;
+  --color-blue-team-bg: #3284a3;
+  --color-blue-light: #7bcae9;
+  --color-tutorial: #fbc638;
+  --color-tutorial-border: #fde39c;
+
+  --breakpoint-mobile: 501px;
+  --breakpoint-1201px: 1201px;
+  --breakpoint-1460px: 1460px;
+
+  --radius-20px: 20px;
+
+  --shadow-sharp: 4px 4px 0px 0px rgba(0, 0, 0, 0.59);
+  --shadow-inset: inset 2px 2px 0px 0px silver;
+  --shadow-bottom: 0 4px 0 0 rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 4px 0 -1px rgba(0, 0, 0, 0.3);
+
+  --text-vw: 4.5vw;
+  --text-xxs: 0.625rem;
+
+  --spacing-50: 50px;
+
+  --width-500px: 500px;
+  --width-26vw: 26vw;
+  --width-30vw: 30vw;
+  --width-32vw: 32vw;
+  --width-38vw: 38vw;
+
+  --min-height-700px: 700px;
+
+  --z-index-70: 70;
+
+  --font-fira: 'Fira Sans Extra Condensed', sans-serif;
+}
 
 html {
   font-family: 'Nunito', sans-serif;
@@ -67,19 +115,17 @@ body {
   border-color: rgb(199, 247, 156) rgb(106, 233, 17) rgb(95, 163, 19) !important;
 }
 
-@layer utilities {
-  .text-shadow {
-    text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.6);
-  }
+@utility text-shadow {
+  text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.6);
 }
 
 @layer components {
   .border-ui {
-    @apply border border-solid border-black border-opacity-30;
+    @apply border border-solid border-black/30;
   }
 
   .tutorial {
-    @apply z-10 w-full border-t-8 border-tutorial bg-tutorial px-6 pb-8 pt-3;
+    @apply border-tutorial-border bg-tutorial z-10 w-full border-t-8 px-6 pt-3 pb-8;
   }
 
   .tutorial b {
@@ -87,26 +133,26 @@ body {
   }
 
   .create-button-wrapper {
-    @apply inline-block rounded-20px bg-gradient-to-br from-border-yellow via-yellow to-border-orange shadow-sharp;
+    @apply rounded-20px from-border-yellow via-yellow to-border-orange shadow-sharp inline-block bg-linear-to-br;
   }
 
   .create-button {
-    @apply rounded-20px bg-gradient-to-br from-yellow to-orange px-3 py-2 text-center text-vw font-black text-black;
+    @apply rounded-20px from-yellow to-orange text-vw bg-linear-to-br px-3 py-2 text-center font-black text-black;
   }
 
   .close-button {
-    @apply text-xxs absolute right-0 top-0 mr-6 mt-2 flex h-4 w-4 items-center justify-center rounded-full text-black;
+    @apply text-xxs absolute top-0 right-0 mt-2 mr-6 flex h-4 w-4 items-center justify-center rounded-full text-black;
   }
 
-  @screen sm {
+  @media (width >= theme(--breakpoint-sm)) {
     .create-button {
       @apply text-2xl;
     }
   }
 
-  @screen md {
+  @media (width >= theme(--breakpoint-md)) {
     .tutorial {
-      @apply w-500px rounded-20px border-0 bg-transparent bg-gradient-to-b from-tutorial-desktop to-transparent p-8 pt-5;
+      @apply w-500px rounded-20px from-tutorial-desktop border-0 bg-transparent bg-linear-to-b to-transparent p-8 pt-5;
     }
   }
 }

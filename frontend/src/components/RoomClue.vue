@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import type { Clue, Player, Room } from '@/types/types'
+import type { Clue, Player, Room } from '@/domain/types'
 import { computed, ref, watch } from 'vue'
-import { apiFetchData } from '@/utils/api'
+import { roomService } from '@/application/roomService'
+import { isOperativeTurn, isSpyTurn } from '@/domain/roomRules'
 import Social from '@/components/SocialMedia.vue'
 import { useWebsocketStore } from '@/stores/websocket'
 
@@ -18,23 +19,9 @@ const clueName = ref<string>('')
 const clueOptions = ref<number[]>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 const showClue = ref<boolean>(false)
 
-const isUserSpyTurn = computed((): boolean => {
-  return !!(
-    props.user?.playerRole === 'SPYMASTER' &&
-    props.user?.playerTeam === props.room.teamTurn &&
-    props.room.roleTurn === 'SPYMASTER' &&
-    props.room.status === 'IN_PROGRESS'
-  )
-})
+const isUserSpyTurn = computed((): boolean => isSpyTurn(props.room, props.user))
 
-const isUserOperativeTurn = computed((): boolean => {
-  return !!(
-    props.user?.playerRole === 'OPERATIVE' &&
-    props.user?.playerTeam === props.room.teamTurn &&
-    props.room.roleTurn === 'OPERATIVE' &&
-    props.room.status === 'IN_PROGRESS'
-  )
-})
+const isUserOperativeTurn = computed((): boolean => isOperativeTurn(props.room, props.user))
 
 const getLastClue = computed((): Clue => {
   const lastClue = props.room.clues[props.room.clues.length - 1]
@@ -62,17 +49,17 @@ const sendClue = async (): Promise<void> => {
   if (!clueNumber.value) return
 
   try {
-    await apiFetchData(`room/${props.room.id}`, 'PUT', {
-      action: 'add-clue',
-      clue: {
+    await roomService.addClue(
+      props.room.id,
+      props.user!.name,
+      {
         clueName: clueName.value,
         attempts: clueNumber.value,
         remaining: clueNumber.value + 1,
-        spyName: props.user?.name
+        spyName: props.user!.name
       },
-      username: props.user?.name
-    })
-    websocketStore.handleUserActivity()
+      websocketStore.handleUserActivity
+    )
   } catch (error) {
     console.error(error)
   }
@@ -82,10 +69,11 @@ const teamTurn = async (): Promise<void> => {
   if (!isUserOperativeTurn.value) return
 
   try {
-    await apiFetchData(`room/${props.room.id}`, 'PUT', {
-      action: 'manual-team-turn',
-      username: props.user?.name
-    })
+    await roomService.manualTeamTurn(
+      props.room.id,
+      props.user!.name,
+      websocketStore.handleUserActivity
+    )
   } catch (error) {
     console.error(error)
   }
@@ -110,23 +98,23 @@ const teamTurn = async (): Promise<void> => {
                 tabindex="0"
                 placeholder="Tapez votre indice ici"
                 @input="clueName = clueName.toUpperCase()"
-                class="h-10 w-full rounded-xl border-none px-3 text-2xl text-black shadow-bottom focus:outline-none"
+                class="shadow-bottom h-10 w-full rounded-xl border-none px-3 text-2xl text-black focus:outline-none"
               />
             </div>
             <div class="mx-2 flex-none">
               <div class="relative">
                 <div
-                  class="border-ui flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-white text-2xl shadow-bottom"
+                  class="border-ui shadow-bottom flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-white text-2xl"
                   @click="isClueModalOpen = !isClueModalOpen"
                 >
                   {{ clueNumber || '–' }}
                 </div>
                 <div v-if="isClueModalOpen" class="clue-number-modal absolute z-50">
-                  <div class="border-ui flex rounded-lg bg-white p-2 shadow-bottom">
+                  <div class="border-ui shadow-bottom flex rounded-lg bg-white p-2">
                     <div v-for="number in clueOptions" :key="number">
                       <div
-                        class="clue-number-option inline-block cursor-pointer rounded-lg text-2xl leading-6 hover:bg-yellow"
-                        @click="(clueNumber = number), (isClueModalOpen = false)"
+                        class="clue-number-option hover:bg-yellow inline-block cursor-pointer rounded-lg text-2xl leading-6"
+                        @click="((clueNumber = number), (isClueModalOpen = false))"
                       >
                         {{ number }}
                       </div>
@@ -137,7 +125,7 @@ const teamTurn = async (): Promise<void> => {
             </div>
             <div class="relative flex-initial portrait:pt-2">
               <button
-                class="button color-green text-base shadow-bottom sm:text-2xl"
+                class="button color-green shadow-bottom text-base sm:text-2xl"
                 @click="sendClue"
               >
                 Donner un indice
@@ -154,13 +142,13 @@ const teamTurn = async (): Promise<void> => {
         <Social v-if="windowWidth <= 500" />
         <div class="flex w-full flex-col items-center justify-center text-xl landscape:text-3xl">
           <Transition name="slide-fade">
-            <div class="flex items-center justify-center">
+            <div v-show="getLastClue" class="flex items-center justify-center">
               <span
                 :class="{
                   'ring-blue-light': props.room.teamTurn === 'BLUE',
                   'ring-red-light': props.room.teamTurn === 'RED'
                 }"
-                class="ml-1 select-text rounded-lg bg-white px-3 py-1 font-bold uppercase ring-4 landscape:ml-2 landscape:px-4 landscape:py-2 landscape:ring-8"
+                class="ml-1 rounded-lg bg-white px-3 py-1 font-bold uppercase ring-4 select-text landscape:ml-2 landscape:px-4 landscape:py-2 landscape:ring-8"
               >
                 {{ getLastClue?.clueName }}
               </span>
@@ -169,7 +157,7 @@ const teamTurn = async (): Promise<void> => {
                   'ring-blue-light': props.room.teamTurn === 'BLUE',
                   'ring-red-light': props.room.teamTurn === 'RED'
                 }"
-                class="ml-1 select-text rounded-lg bg-white px-3 py-1 font-bold uppercase ring-4 landscape:ml-2 landscape:px-4 landscape:py-2 landscape:ring-8"
+                class="ml-1 rounded-lg bg-white px-3 py-1 font-bold uppercase ring-4 select-text landscape:ml-2 landscape:px-4 landscape:py-2 landscape:ring-8"
               >
                 {{ getLastClue?.attempts }}
               </span>

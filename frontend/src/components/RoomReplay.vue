@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { Player, Room } from '@/types/types'
-import { apiFetchData } from '@/utils/api'
+import type { Player, Room } from '@/domain/types'
+import { roomService } from '@/application/roomService'
+import { didTeamWin } from '@/domain/roomRules'
 import { computed } from 'vue'
 import { useWebsocketStore } from '@/stores/websocket'
 
@@ -13,13 +14,10 @@ const props = defineProps<{
 const websocketStore = useWebsocketStore()
 
 const isTeamWin = computed((): string => {
-  if (props.user?.playerTeam === 'RED' && props.room.status === 'RED_TEAM_WINS') {
+  if (props.user && didTeamWin(props.room, props.user.playerTeam)) {
     return 'Vous avez gagné !'
-  } else if (props.user?.playerTeam === 'BLUE' && props.room.status === 'BLUE_TEAM_WINS') {
-    return 'Vous avez gagné !'
-  } else {
-    return 'Vous avez perdu !'
   }
+  return 'Vous avez perdu !'
 })
 
 const details = computed((): string => {
@@ -34,17 +32,13 @@ const details = computed((): string => {
 const replay = async (): Promise<void> => {
   if (!props.isHost) return
   try {
-    await apiFetchData(`room/${props.room.id}`, 'PUT', {
-      action: 'replay',
-      usernames: getUsernames()
-    })
-    websocketStore.handleUserActivity()
+    await roomService.replay(props.room.id, getUsernames(), websocketStore.handleUserActivity)
   } catch (error) {
     console.error(error)
   }
 }
 
-const getUsernames = (): String[] => {
+const getUsernames = (): string[] => {
   const usernames = props.room.players.map((player) => player.name)
   return usernames
 }
@@ -58,7 +52,7 @@ const getUsernames = (): String[] => {
         <p class="text-md text-center landscape:text-lg">{{ details }}</p>
       </section>
       <section class="mt-2" v-if="isHost">
-        <button class="button text-base shadow-bottom" @click="replay">Refaire une partie</button>
+        <button class="button shadow-bottom text-base" @click="replay">Refaire une partie</button>
       </section>
     </div>
   </div>

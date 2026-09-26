@@ -1,4 +1,4 @@
-FROM openjdk:20
+FROM eclipse-temurin:21-jdk
 WORKDIR /app/backend
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./

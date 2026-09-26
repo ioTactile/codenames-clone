@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import type { Room, Player, Word } from '@/types/types'
+import type { Room, Player, Word } from '@/domain/types'
 import { computed, ref } from 'vue'
-import { apiFetchData } from '@/utils/api'
+import { roomService } from '@/application/roomService'
+import { canClickWord, isPlayerTurn } from '@/domain/roomRules'
 import { useWebsocketStore } from '@/stores/websocket'
 
 const props = defineProps<{
@@ -12,14 +13,7 @@ const props = defineProps<{
 const websocketStore = useWebsocketStore()
 const isCardClicked = ref(Array(props.room.words.length).fill(false))
 
-const isUserTurn = computed((): boolean => {
-  return !!props.room.players.find(
-    (player) =>
-      player.name === props.user?.name &&
-      player.playerTeam === props.room.teamTurn &&
-      player.playerRole === props.room.roleTurn
-  )
-})
+const isUserTurn = computed((): boolean => isPlayerTurn(props.room, props.user))
 
 const toggleCardTransformation = (index: number): void => {
   isCardClicked.value[index] = !isCardClicked.value[index]
@@ -34,35 +28,28 @@ const isWordClicked = (word: Word): boolean => {
 }
 
 const clickWord = async (word: Word): Promise<void> => {
-  if (props.room.status !== 'IN_PROGRESS') return
-  if (isUserSpy()) return
-  if (!isUserTurn.value) return
-  const roomId = props.room.id
+  if (!canClickWord(props.room, props.user) || isUserSpy()) return
   try {
-    await apiFetchData(`room/${roomId}`, 'PUT', {
-      action: 'click-word',
-      username: props.user?.name,
-      wordname: word.wordName
-    })
-    websocketStore.handleUserActivity()
+    await roomService.clickWord(
+      props.room.id,
+      props.user!.name,
+      word.wordName,
+      websocketStore.handleUserActivity
+    )
   } catch (error) {
     console.error(error)
   }
 }
 
 const selectWord = async (word: Word): Promise<void> => {
-  if (props.room.status !== 'IN_PROGRESS') return
-  if (isUserSpy()) return
-  if (!isUserTurn.value) return
-  if (isWordClicked(word)) return
-  const roomId = props.room.id
+  if (!canClickWord(props.room, props.user) || isUserSpy() || isWordClicked(word)) return
   try {
-    await apiFetchData(`room/${roomId}`, 'PUT', {
-      action: 'select-word',
-      username: props.user?.name,
-      wordname: word.wordName
-    })
-    websocketStore.handleUserActivity()
+    await roomService.selectWord(
+      props.room.id,
+      props.user!.name,
+      word.wordName,
+      websocketStore.handleUserActivity
+    )
   } catch (error) {
     console.error(error)
   }
@@ -73,7 +60,8 @@ const getCharacter = (color: string, wordname: string): string => {
   const colorWords = props.room.words.filter((word) => word.wordColor === color)
   const wordLocation = colorWords.findIndex((word) => word.wordName === wordname)
   switch (color) {
-    case 'RED' || 'BLUE':
+    case 'RED':
+    case 'BLUE':
       number = (wordLocation / 8) * 100
       return `background-position-y: ${number}%;`
     case 'WHITE':
@@ -113,7 +101,7 @@ const getBackground = (color: string): string => {
           @click="selectWord(word)"
         >
           <div
-            class="flex h-full items-end justify-center whitespace-nowrap break-all pb-1.5 font-fira text-sm font-bold uppercase mobile:pb-5 mobile:text-3xl"
+            class="font-fira mobile:pb-5 mobile:text-3xl flex h-full items-end justify-center pb-1.5 text-sm font-bold break-all whitespace-nowrap uppercase"
             :class="word.wordColor === 'BLACK' && isUserSpy() ? 'text-white' : 'text-black'"
           >
             {{ word.wordName }}
@@ -122,7 +110,7 @@ const getBackground = (color: string): string => {
             <div v-for="(player, j) in word.selectedBy" :key="j">
               <div class="tips-wrapper absolute flex flex-wrap">
                 <div
-                  class="text-xxs mb-0.5 mr-0.5 inline-block truncate rounded-sm p-px px-1 leading-none text-white landscape:text-sm"
+                  class="text-xxs mr-0.5 mb-0.5 inline-block truncate rounded-sm p-px px-1 leading-none text-white landscape:text-sm"
                   :class="{
                     'bg-blue-team-bg': room.teamTurn === 'BLUE',
                     'bg-red-team-bg': room.teamTurn === 'RED'
@@ -135,12 +123,12 @@ const getBackground = (color: string): string => {
             <button
               v-if="room.status === 'IN_PROGRESS' && isUserTurn && !isUserSpy()"
               @click.stop="clickWord(word)"
-              class="click-button pointer-events-auto absolute z-10 rounded-full bg-yellow shadow-bottom"
+              class="click-button bg-yellow shadow-bottom pointer-events-auto absolute z-10 rounded-full"
             ></button>
           </template>
           <template v-else>
             <div
-              class="card absolute top-0 z-10 shadow-card"
+              class="card shadow-card absolute top-0 z-10"
               :class="{
                 peak: isCardClicked[i]
               }"
