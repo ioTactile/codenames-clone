@@ -14,15 +14,15 @@ describe('apiClient', () => {
       vi.fn().mockResolvedValue({
         ok: true,
         headers: new Headers({ 'Content-Type': 'application/json' }),
-        json: async () => ({ id: 1 })
-      })
+        json: async () => ({ id: 1 }),
+      }),
     )
 
     const data = await apiFetchData<{ id: number }>('room/1', 'GET')
     expect(data.id).toBe(1)
     expect(fetch).toHaveBeenCalledWith(
       'http://localhost:8080/room/1',
-      expect.objectContaining({ method: 'GET' })
+      expect.objectContaining({ method: 'GET' }),
     )
   })
 
@@ -32,8 +32,8 @@ describe('apiClient', () => {
       vi.fn().mockResolvedValue({
         ok: false,
         status: 500,
-        headers: new Headers()
-      })
+        headers: new Headers(),
+      }),
     )
 
     await expect(apiFetchData('room/1', 'GET')).rejects.toThrow('HTTP error! status: 500')

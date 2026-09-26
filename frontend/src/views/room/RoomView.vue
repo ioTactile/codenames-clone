@@ -2,7 +2,7 @@
   <div class="first-layer absolute inset-0"></div>
   <div class="second-layer absolute inset-0 bg-cover"></div>
   <div class="flex h-screen w-full items-center justify-center">
-    <button class="button text-base shadow-bottom">
+    <button class="button shadow-bottom text-base">
       <RouterLink to="/">Retour à la page d'accueil</RouterLink>
     </button>
   </div>

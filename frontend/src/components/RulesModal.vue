@@ -35,7 +35,7 @@ const close = (): void => {
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-50 transition-opacity" />
+        <div class="bg-opacity-50 fixed inset-0 bg-gray-500 transition-opacity" />
       </TransitionChild>
 
       <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -50,10 +50,10 @@ const close = (): void => {
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div
-              class="modal-wrapper absolute left-1/2 top-4 flex w-11/12 -translate-x-1/2 transform flex-col overflow-hidden rounded-xl bg-white landscape:w-3/4"
+              class="modal-wrapper absolute top-4 left-1/2 flex w-11/12 -translate-x-1/2 transform flex-col overflow-hidden rounded-xl bg-white landscape:w-3/4"
             >
               <button
-                class="cross-button z-100 absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-base shadow-bottom"
+                class="cross-button shadow-bottom absolute top-2 right-2 z-100 flex h-6 w-6 items-center justify-center rounded-full text-base"
                 @click="close"
               >
                 <svg
@@ -73,7 +73,7 @@ const close = (): void => {
               <nav class="flex flex-none justify-center bg-gray-200 p-2 pr-10">
                 <button
                   :class="isCodenames ? 'border-gray-500 bg-white' : 'border-gray-300'"
-                  class="dark:shadow-inset-dark flex flex-1 items-center justify-center rounded-lg border-2 px-0.5 py-1 shadow-inset"
+                  class="dark:shadow-inset-dark shadow-inset flex flex-1 items-center justify-center rounded-lg border-2 px-0.5 py-1"
                   @click="switchGame"
                 >
                   <figure class="flex-initial">
@@ -81,7 +81,7 @@ const close = (): void => {
                   </figure>
                   <div class="mr-2 text-left">
                     <h3
-                      class="text-xs font-bold leading-none text-pink-800 dark:text-pink-600 sm:text-base sm:leading-tight"
+                      class="text-xs leading-none font-bold text-pink-800 sm:text-base sm:leading-tight dark:text-pink-600"
                     >
                       Codenames
                     </h3>
@@ -99,7 +99,7 @@ const close = (): void => {
                   </figure>
                   <section class="mr-2 text-left">
                     <h3
-                      class="text-xs font-bold leading-none text-green-800 dark:text-green-600 sm:text-base sm:leading-tight"
+                      class="text-xs leading-none font-bold text-green-800 sm:text-base sm:leading-tight dark:text-green-600"
                     >
                       Codenames Duet
                     </h3>
@@ -185,7 +185,7 @@ const close = (): void => {
                       width="90"
                       src="https://cdn.codenames.game/v20210210/rules/assassin_card_blank.png"
                       alt="assassin card"
-                      class="float-left pr-4 pt-1"
+                      class="float-left pt-1 pr-4"
                     />
                     Watch out for the black card – it's an Assassin! Avoid clues that would lead to
                     the assassin or to the other team's words.

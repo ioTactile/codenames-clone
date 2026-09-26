@@ -9,5 +9,5 @@ export type {
   Team,
   Role,
   WordState,
-  WordColor
+  WordColor,
 } from '@/domain/types'

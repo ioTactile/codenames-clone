@@ -8,7 +8,7 @@ import {
   isPlayerTurn,
   isSpyTurn,
   isWinningStatus,
-  playersByTeamRole
+  playersByTeamRole,
 } from '@/domain/roomRules'
 import type { Player, Room } from '@/domain/types'
 
@@ -16,7 +16,7 @@ const baseRoom = (overrides: Partial<Room> = {}): Room => ({
   id: 1,
   players: [
     { name: 'host', playerTeam: 'RED', playerRole: 'SPYMASTER' },
-    { name: 'agent', playerTeam: 'RED', playerRole: 'OPERATIVE' }
+    { name: 'agent', playerTeam: 'RED', playerRole: 'OPERATIVE' },
   ],
   words: [],
   clues: [],
@@ -28,7 +28,7 @@ const baseRoom = (overrides: Partial<Room> = {}): Room => ({
   isBlackCardSelected: false,
   createdAt: '',
   updatedAt: '',
-  ...overrides
+  ...overrides,
 })
 
 describe('roomRules', () => {
@@ -68,7 +68,7 @@ describe('roomRules', () => {
 
   it('detects players without role', () => {
     const room = baseRoom({
-      players: [{ name: 'newbie', playerTeam: 'NONE', playerRole: 'NONE' } as Player]
+      players: [{ name: 'newbie', playerTeam: 'NONE', playerRole: 'NONE' } as Player],
     })
     expect(hasNoRole(room, 'newbie')).toBe(true)
   })

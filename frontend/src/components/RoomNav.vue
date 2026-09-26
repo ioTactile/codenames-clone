@@ -85,7 +85,7 @@ const getUsernames = (): string[] => {
           :class="{
             'color-beige': user?.playerTeam === 'NONE',
             'color-red': user?.playerTeam === 'RED',
-            'color-blue': user?.playerTeam === 'BLUE'
+            'color-blue': user?.playerTeam === 'BLUE',
           }"
           @click="togglePlayerMenu"
         >

@@ -30,7 +30,7 @@ const defineTimer = (): void => {
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-50 transition-opacity" />
+        <div class="bg-opacity-50 fixed inset-0 bg-gray-500 transition-opacity" />
       </TransitionChild>
 
       <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -47,7 +47,7 @@ const defineTimer = (): void => {
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div
-              class="border-ui rounded-xl bg-white py-2 pb-4 shadow-bottom portrait:w-11/12 landscape:w-1/3"
+              class="border-ui shadow-bottom rounded-xl bg-white py-2 pb-4 portrait:w-11/12 landscape:w-1/3"
             >
               <h1 class="mb-2 text-center text-xl font-bold">Sablier</h1>
               <p class="mb-4 px-4 text-center text-base">

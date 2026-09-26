@@ -25,5 +25,5 @@ export const useUrlStore = defineStore(
 
     return { urlId, setUrl, removeUrl, getUrl, isUrlHidden }
   },
-  { persist: true }
+  { persist: true },
 )

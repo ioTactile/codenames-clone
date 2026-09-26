@@ -6,25 +6,25 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('@/views/HomeView.vue')
+      component: () => import('@/views/HomeView.vue'),
     },
     {
       path: '/room',
       name: 'room',
-      component: () => import('@/views/room/RoomView.vue')
+      component: () => import('@/views/room/RoomView.vue'),
     },
     {
       path: '/room/create',
       name: 'create-room',
-      component: () => import('@/views/room/CreateRoomView.vue')
+      component: () => import('@/views/room/CreateRoomView.vue'),
     },
     {
       path: '/room/:id',
       name: 'room-details',
       component: () => import('@/views/room/RoomDetailsView.vue'),
-      props: (route) => ({ id: Number(route.params.id) })
-    }
-  ]
+      props: (route) => ({ id: Number(route.params.id) }),
+    },
+  ],
 })
 
 export default router

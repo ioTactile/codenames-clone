@@ -34,7 +34,7 @@ const clickWord = async (word: Word): Promise<void> => {
       props.room.id,
       props.user!.name,
       word.wordName,
-      websocketStore.handleUserActivity
+      websocketStore.handleUserActivity,
     )
   } catch (error) {
     console.error(error)
@@ -48,7 +48,7 @@ const selectWord = async (word: Word): Promise<void> => {
       props.room.id,
       props.user!.name,
       word.wordName,
-      websocketStore.handleUserActivity
+      websocketStore.handleUserActivity,
     )
   } catch (error) {
     console.error(error)
@@ -96,7 +96,7 @@ const getBackground = (color: string): string => {
             red: word.wordColor === 'RED' && isUserSpy(),
             white: !isUserSpy() || (word.wordColor === 'WHITE' && isUserSpy()),
             blue: word.wordColor === 'BLUE' && isUserSpy(),
-            black: word.wordColor === 'BLACK' && isUserSpy()
+            black: word.wordColor === 'BLACK' && isUserSpy(),
           }"
           @click="selectWord(word)"
         >
@@ -113,7 +113,7 @@ const getBackground = (color: string): string => {
                   class="text-xxs mr-0.5 mb-0.5 inline-block truncate rounded-sm p-px px-1 leading-none text-white landscape:text-sm"
                   :class="{
                     'bg-blue-team-bg': room.teamTurn === 'BLUE',
-                    'bg-red-team-bg': room.teamTurn === 'RED'
+                    'bg-red-team-bg': room.teamTurn === 'RED',
                   }"
                 >
                   {{ player }}
@@ -130,7 +130,7 @@ const getBackground = (color: string): string => {
             <div
               class="card shadow-card absolute top-0 z-10"
               :class="{
-                peak: isCardClicked[i]
+                peak: isCardClicked[i],
               }"
               @click="toggleCardTransformation(i)"
             >
@@ -138,7 +138,7 @@ const getBackground = (color: string): string => {
                 class="absolute top-0 z-10"
                 :class="{
                   'black-background': word.wordColor === 'BLACK',
-                  'card-background': word.wordColor !== 'BLACK'
+                  'card-background': word.wordColor !== 'BLACK',
                 }"
                 :style="getBackground(word.wordColor)"
               >
@@ -148,7 +148,7 @@ const getBackground = (color: string): string => {
                   :class="{
                     red: word.wordColor === 'RED',
                     gray: word.wordColor === 'WHITE',
-                    blue: word.wordColor === 'BLUE'
+                    blue: word.wordColor === 'BLUE',
                   }"
                   :style="getCharacter(word.wordColor, word.wordName)"
                 ></div>

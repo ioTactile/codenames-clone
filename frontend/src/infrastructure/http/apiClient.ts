@@ -1,20 +1,20 @@
 export async function apiFetchData<T = unknown>(
   url: string,
   method: string,
-  bodyData?: Record<string, unknown>
+  bodyData?: Record<string, unknown>,
 ): Promise<T> {
   const fullUrl = import.meta.env.DEV
     ? import.meta.env.VITE_API_URL_DEV + url
     : import.meta.env.VITE_API_URL_PROD + url
 
   const headers = new Headers({
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   })
 
   const options: RequestInit = {
     method,
     headers,
-    body: bodyData ? JSON.stringify(bodyData) : undefined
+    body: bodyData ? JSON.stringify(bodyData) : undefined,
   }
 
   const response = await fetch(fullUrl, options)

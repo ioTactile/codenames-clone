@@ -26,5 +26,5 @@ export const useUserStore = defineStore(
 
     return { user, setUser, removeUser, getUser }
   },
-  { persist: true }
+  { persist: true },
 )

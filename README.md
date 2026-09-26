@@ -4,9 +4,7 @@ Clone multijoueur du jeu **Codenames** : parties en temps réel, plateau partag�
 
 Monorepo full-stack — backend Java / Spring Boot, frontend Vue 3, PostgreSQL, orchestré avec Docker Compose.
 
----
-
-## Fonctionnalités
+## Features
 
 - Création et rejoindre une salle par ID
 - Attribution d’équipes (Rouge / Bleu) et de rôles (Espion / Agent)
@@ -15,32 +13,42 @@ Monorepo full-stack — backend Java / Spring Boot, frontend Vue 3, PostgreSQL, 
 - Mises à jour live via STOMP / SockJS
 - Interface responsive (desktop & mobile)
 
----
-
-## Stack technique
+## Stack
 
 | Couche | Technologies |
-|--------|----------------|
+| --- | --- |
 | Frontend | Vue 3, TypeScript, Vite, Pinia, Vue Router, Tailwind CSS 4, Vitest, Playwright |
 | Backend | Java 21, Spring Boot 4, Spring Web MVC, Spring Data JPA, Spring WebSocket |
 | Données | PostgreSQL |
 | Infra | Docker, Docker Compose, Nginx (prod) |
 
-Architecture **hexagonale légère** :
+## Structure
 
-- **Backend** — `domain` (règles pures) → `application` (use cases + ports) → `adapter` (HTTP, JPA, WebSocket, liste de mots)
-- **Frontend** — `domain` / `application` / `infrastructure` / UI (composants & stores)
-
----
+```text
+codenames-clone/
+├── backend/                 # Spring Boot (hexagonal)
+│   ├── src/main/java/.../domain/
+│   ├── src/main/java/.../application/
+│   ├── src/main/java/.../adapter/
+│   └── src/test/java/
+├── frontend/                # Vue 3 + Vite
+│   ├── src/domain/
+│   ├── src/application/
+│   ├── src/infrastructure/
+│   ├── src/components/ | views/ | stores/
+│   └── e2e/
+├── docker-compose-dev.yml
+├── docker-compose-prod.yml
+├── start-dev.sh
+└── start-prod.sh
+```
 
 ## Prérequis
 
 - [Docker](https://docs.docker.com/get-docker/) & Docker Compose
 - (Optionnel, hors Docker) Node.js 22+, JDK 21, Maven Wrapper inclus
 
----
-
-## Démarrage rapide (développement)
+## Démarrage
 
 ### 1. Variables d’environnement
 
@@ -78,7 +86,7 @@ POSTGRES_PASSWORD=changeme
 CHOKIDAR_USEPOLLING=true
 ```
 
-### 2. Lancer la stack
+### 2. Lancer la stack (développement)
 
 ```bash
 bash start-dev.sh
@@ -87,7 +95,7 @@ bash start-dev.sh
 ```
 
 | Service | URL |
-|---------|-----|
+| --- | --- |
 | Frontend (Vite) | http://localhost:5173 |
 | API / WebSocket | http://localhost:8080 |
 | pgAdmin | http://localhost:8888 |
@@ -99,9 +107,7 @@ Arrêt :
 docker compose -p codenames -f docker-compose-dev.yml down
 ```
 
----
-
-## Production
+### Production
 
 ```bash
 cp backend/.env.production.example backend/.env.production
@@ -112,20 +118,18 @@ bash start-prod.sh
 
 Services exposés notamment sur le port **80** (Nginx / frontend prod) et **8080** (API). Adapter les URLs Vite (`VITE_API_URL_PROD`, `VITE_WEBSOCKET_URL_PROD`) à votre domaine.
 
----
-
-## Développement local (sans Docker pour le code)
+### Développement local (sans Docker pour le code)
 
 Utile pour itérer plus vite une fois Postgres disponible (via Compose ou local).
 
-### Backend
+Backend :
 
 ```bash
 cd backend
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-### Frontend
+Frontend :
 
 ```bash
 cd frontend
@@ -133,14 +137,12 @@ npm install
 npm run dev
 ```
 
----
-
-## Scripts utiles
+## Scripts
 
 ### Frontend (`frontend/`)
 
 | Commande | Description |
-|----------|-------------|
+| --- | --- |
 | `npm run dev` | Serveur de développement Vite |
 | `npm run build` | Type-check + build de production |
 | `npm run type-check` | Vérification TypeScript (`vue-tsc`) |
@@ -152,67 +154,35 @@ npm run dev
 ### Backend (`backend/`)
 
 | Commande | Description |
-|----------|-------------|
+| --- | --- |
 | `./mvnw spring-boot:run` | Démarrer l’API |
 | `./mvnw test` | Tests unitaires / WebMvc / contexte |
 | `./mvnw -DskipTests package` | JAR `target/app.jar` |
 
----
+## Architecture
 
-## API (aperçu)
+Architecture **hexagonale légère** :
+
+- **Backend** — `domain` (règles pures) → `application` (use cases + ports) → `adapter` (HTTP, JPA, WebSocket, liste de mots)
+- **Frontend** — `domain` / `application` / `infrastructure` / UI (composants & stores)
+
+### API (aperçu)
 
 Base : `http://localhost:8080/room`
 
 | Méthode | Endpoint | Description |
-|---------|----------|-------------|
+| --- | --- | --- |
 | `POST` | `/room/create` | Créer une salle (`{ "username": "…" }`) |
 | `GET` | `/room/{id}` | État de la salle |
 | `DELETE` | `/room/{id}` | Supprimer la salle |
-| `PUT` | `/room/{id}` | Action de jeu (voir ci-dessous) |
+| `PUT` | `/room/{id}` | Action de jeu |
 
 Actions `PUT` (champ `action`) : `join`, `leave`, `start`, `shuffle-players`, `reset-players`, `change-host`, `select-team`, `select-role`, `change-username`, `manual-team-turn`, `select-word`, `click-word`, `add-clue`, `replay`.
 
 Topic WebSocket (STOMP) : `/topic/room/{id}` — endpoint SockJS : `/ws`.
 
----
+## Licence
 
-## Structure du dépôt
-
-```text
-codenames-clone/
-├── backend/                 # Spring Boot (hexagonal)
-│   ├── src/main/java/.../domain/
-│   ├── src/main/java/.../application/
-│   ├── src/main/java/.../adapter/
-│   └── src/test/java/
-├── frontend/                # Vue 3 + Vite
-│   ├── src/domain/
-│   ├── src/application/
-│   ├── src/infrastructure/
-│   ├── src/components/ | views/ | stores/
-│   └── e2e/
-├── docker-compose-dev.yml
-├── docker-compose-prod.yml
-├── start-dev.sh
-└── start-prod.sh
-```
-
----
-
-## Tests
-
-```bash
-# Backend — GameEngine, use cases, contrôleur, contexte Spring
-cd backend && ./mvnw test
-
-# Frontend — règles métier, stores, client HTTP
-cd frontend && npm run test:unit
-```
-
----
-
-## Licence & auteur
-
-Projet personnel / pédagogique — [Jordan Biesmans](mailto:jbs.io@protonmail.com).
+MIT License — see [LICENSE](./LICENSE).
 
 Codenames est une marque de Czech Games Edition ; ce dépôt est un clone non officiel à des fins d’apprentissage.

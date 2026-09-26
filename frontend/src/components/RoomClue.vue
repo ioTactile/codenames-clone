@@ -40,7 +40,7 @@ watch(
   () => props.room.roleTurn,
   () => {
     getRoleTurn()
-  }
+  },
 )
 
 const sendClue = async (): Promise<void> => {
@@ -56,9 +56,9 @@ const sendClue = async (): Promise<void> => {
         clueName: clueName.value,
         attempts: clueNumber.value,
         remaining: clueNumber.value + 1,
-        spyName: props.user!.name
+        spyName: props.user!.name,
       },
-      websocketStore.handleUserActivity
+      websocketStore.handleUserActivity,
     )
   } catch (error) {
     console.error(error)
@@ -72,7 +72,7 @@ const teamTurn = async (): Promise<void> => {
     await roomService.manualTeamTurn(
       props.room.id,
       props.user!.name,
-      websocketStore.handleUserActivity
+      websocketStore.handleUserActivity,
     )
   } catch (error) {
     console.error(error)
@@ -146,7 +146,7 @@ const teamTurn = async (): Promise<void> => {
               <span
                 :class="{
                   'ring-blue-light': props.room.teamTurn === 'BLUE',
-                  'ring-red-light': props.room.teamTurn === 'RED'
+                  'ring-red-light': props.room.teamTurn === 'RED',
                 }"
                 class="ml-1 rounded-lg bg-white px-3 py-1 font-bold uppercase ring-4 select-text landscape:ml-2 landscape:px-4 landscape:py-2 landscape:ring-8"
               >
@@ -155,7 +155,7 @@ const teamTurn = async (): Promise<void> => {
               <span
                 :class="{
                   'ring-blue-light': props.room.teamTurn === 'BLUE',
-                  'ring-red-light': props.room.teamTurn === 'RED'
+                  'ring-red-light': props.room.teamTurn === 'RED',
                 }"
                 class="ml-1 rounded-lg bg-white px-3 py-1 font-bold uppercase ring-4 select-text landscape:ml-2 landscape:px-4 landscape:py-2 landscape:ring-8"
               >

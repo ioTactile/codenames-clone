@@ -3,7 +3,7 @@
     <div class="mb-4">
       <RouterLink to="#" class="text-lg text-white underline hover:no-underline">FAQ</RouterLink>
     </div>
-    <p class="px-2 text-sm leading-4 text-lightGray">
+    <p class="text-lightGray px-2 text-sm leading-4">
       Vous êtes sur l'adaptation officielle du jeu de société Codenames. Veuillez noter que ce site
       web est encore en beta.
       <br />

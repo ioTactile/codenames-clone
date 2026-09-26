@@ -29,7 +29,7 @@ const changeUsername = async (): Promise<void> => {
       props.id,
       props.user!.name,
       username.value,
-      websocketStore.handleUserActivity
+      websocketStore.handleUserActivity,
     )
     userStore.setUser(props.id, username.value)
   } catch (error) {
@@ -108,7 +108,7 @@ const selectTeam = async (team: Team): Promise<void> => {
       <div
         class="bg-gray-200 px-2 py-4"
         :class="{
-          'rounded-xl': status !== 'PENDING'
+          'rounded-xl': status !== 'PENDING',
         }"
       >
         <div class="px-2 text-center">
@@ -125,20 +125,6 @@ const selectTeam = async (team: Team): Promise<void> => {
           <button class="button" @click="changeUsername">Changer de pseudo</button>
         </div>
       </div>
-      <!-- <hr class="border-gray-300" />
-      <div class="bg-gray-200 p-4">
-        <div class="flex cursor-pointer items-center justify-start">
-          <div class="mr-4 w-14">
-            <div class="relative w-full">
-              <label class="switch">
-                <input v-model="isUrlHidden" type="checkbox" @click="urlSwitch" />
-                <span class="slider round"></span>
-              </label>
-            </div>
-          </div>
-          <p class="flex-1">Cacher l'URL du salon dans la barre d'adresse</p>
-        </div>
-      </div> -->
       <hr class="border-gray-300" />
       <div class="flex justify-center rounded-br-xl rounded-bl-xl bg-gray-200 py-4">
         <button class="button shadow-bottom text-base" @click="leaveRoom">

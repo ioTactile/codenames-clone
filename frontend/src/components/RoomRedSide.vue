@@ -26,7 +26,7 @@ const joinRole = async (role: 'OPERATIVE' | 'SPYMASTER'): Promise<void> => {
       props.user.name,
       role,
       'RED',
-      websocketStore.handleUserActivity
+      websocketStore.handleUserActivity,
     )
   } catch (error) {
     console.error(error)

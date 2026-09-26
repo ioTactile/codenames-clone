@@ -87,7 +87,7 @@ const kickPlayer = async (name: string): Promise<void> => {
               class="m-1 inline-flex cursor-default items-center justify-start rounded border-2 border-white bg-white px-1.5 py-0.5 font-bold text-black italic outline-none hover:outline-none active:outline-none"
               @click="togglePlayerMenu(i)"
               :class="{
-                'hover:bg-yellow hover:cursor-pointer': isHost && i !== 0
+                'hover:bg-yellow hover:cursor-pointer': isHost && i !== 0,
               }"
             >
               <span class="bg-green-online mr-1 h-2 w-2 rounded-full"></span>

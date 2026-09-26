@@ -9,7 +9,7 @@ defineProps<{
     :class="
       size === 'landscape'
         ? 'flex items-center justify-center landscape:mx-6 landscape:mt-2 landscape:gap-3'
-        : 'absolute bottom-1.5 right-1 flex items-center justify-center gap-2 landscape:hidden'
+        : 'absolute right-1 bottom-1.5 flex items-center justify-center gap-2 landscape:hidden'
     "
   >
     <a

@@ -73,15 +73,8 @@ watch(
   () => {
     handleResize()
   },
-  { immediate: true }
+  { immediate: true },
 )
-
-// watch(isUrlHidden, (value) => {
-//   if (value === false) {
-//     urlId.value = props.id.toString()
-//   }
-//   history.pushState({}, '', `/room/${urlStore.getUrl()}`)
-// })
 </script>
 
 <template>

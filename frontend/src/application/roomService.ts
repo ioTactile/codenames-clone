@@ -6,7 +6,7 @@ export type RoomActivityHook = () => void
 async function runAction(
   roomId: number,
   payload: RoomAction,
-  onActivity?: RoomActivityHook
+  onActivity?: RoomActivityHook,
 ): Promise<void> {
   await roomHttp.sendRoomAction(roomId, payload)
   onActivity?.()
@@ -42,14 +42,14 @@ export const roomService = {
     username: string,
     role: Role,
     team: Team,
-    onActivity?: RoomActivityHook
+    onActivity?: RoomActivityHook,
   ) => runAction(roomId, { action: 'select-role', username, role, team }, onActivity),
 
   changeUsername: (
     roomId: number,
     username: string,
     newUsername: string,
-    onActivity?: RoomActivityHook
+    onActivity?: RoomActivityHook,
   ) => runAction(roomId, { action: 'change-username', username, newUsername }, onActivity),
 
   manualTeamTurn: (roomId: number, username: string, onActivity?: RoomActivityHook) =>
@@ -65,7 +65,7 @@ export const roomService = {
     runAction(roomId, { action: 'add-clue', username, clue }, onActivity),
 
   replay: (roomId: number, usernames: string[], onActivity?: RoomActivityHook) =>
-    runAction(roomId, { action: 'replay', usernames }, onActivity)
+    runAction(roomId, { action: 'replay', usernames }, onActivity),
 }
 
 export type { Room }

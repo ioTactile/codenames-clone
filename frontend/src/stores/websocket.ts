@@ -75,6 +75,6 @@ export const useWebsocketStore = defineStore('websocket', () => {
     disconnect,
     reconnect,
     disconnnectOnAfk,
-    handleUserActivity
+    handleUserActivity,
   }
 })
